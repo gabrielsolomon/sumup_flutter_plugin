@@ -103,10 +103,25 @@ class Sumup {
   ///
   /// Don't call this method during checkout because it can lead to checkout failure.
   /// Login required.
+  @Deprecated('Use prepareForCheckout(retainBLEConnection) instead')
   static Future<SumupPluginResponse> wakeUpTerminal() async {
     _throwIfNotInitialized();
     await _throwIfNotLoggedIn();
     final method = await _channel.invokeMethod('wakeUpTerminal');
+    return SumupPluginResponse.fromMap(method);
+  }
+
+  /// Calling prepareForCheckout() before instancing a checkout will
+  /// speed up the checkout time.
+  ///
+  /// Don't call this method during checkout because it can lead to checkout failure.
+  /// Login required.
+  static Future<SumupPluginResponse> prepareForCheckout(
+      {bool retainBLEConnection = false}) async {
+    _throwIfNotInitialized();
+    await _throwIfNotLoggedIn();
+    final method =
+    await _channel.invokeMethod('prepareForCheckout', retainBLEConnection);
     return SumupPluginResponse.fromMap(method);
   }
 

@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.sumup.merchant.reader.api.SumUpAPI
+import com.sumup.merchant.reader.api.SumUpExperimentalAPI
 import com.sumup.merchant.reader.api.SumUpLogin
 import com.sumup.merchant.reader.api.SumUpPayment
 import com.sumup.merchant.reader.api.SumUpPayment.builder
@@ -82,6 +83,7 @@ class SumupPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegis
             "getMerchant" -> getMerchant().flutterResult()
             "openSettings" -> openSettings()
             "wakeUpTerminal" -> wakeUpTerminal().flutterResult()
+            "prepareForCheckout" -> prepareForCheckout(call.arguments as Boolean).flutterResult()
             "checkout" -> checkout(call.argument<Map<String, String>>("payment")!!, call.argument<Map<String, String>>("info"))
             "isCheckoutInProgress" -> isCheckoutInProgress().flutterResult()
             "isTipOnCardReaderAvailable" -> isTipOnCardReaderAvailable().flutterResult()
@@ -143,7 +145,7 @@ class SumupPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegis
 
     private fun wakeUpTerminal(): SumUpPluginResponseWrapper {
         Log.d(tag, "wakeUpTerminal")
-        SumUpAPI.prepareForCheckout()
+        SumUpExperimentalAPI.prepareForCheckout(true)
 
         val currentOp = operations["wakeUpTerminal"]!!
         currentOp.response.message = mutableMapOf("wakeUp" to true)
@@ -152,6 +154,16 @@ class SumupPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegis
         return currentOp
     }
 
+    private fun prepareForCheckout(@NonNull retainBLEConnection: Boolean): SumUpPluginResponseWrapper {
+        Log.d(tag, "prepareForCheckout - retainBLEConnection: $retainBLEConnection")
+        SumUpExperimentalAPI.prepareForCheckout(retainBLEConnection)
+
+        val currentOp = operations["prepareForCheckout"]!!
+        currentOp.response.message = mutableMapOf("prepareForCheckout" to true)
+        currentOp.response.status = true
+
+        return currentOp
+    }
     private fun checkout(@NonNull args: Map<String, Any?>, @Nullable info: Map<String, String>?) {
         Log.d(tag, "checkout")
         val payment = builder() // mandatory parameters
